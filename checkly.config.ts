@@ -15,7 +15,7 @@ const config = defineConfig({
     /* A default for how often your Check should run in minutes */
     frequency: 10,
     /* Checkly data centers to run your Checks as monitors */
-    locations: ['us-east-1', 'eu-central-1'],
+    locations: ['us-east-1', 'eu-west-1'],
     /** The Checkly Runtime identifier, determining npm packages and the Node.js version available at runtime.
      * See https://www.checklyhq.com/docs/cli/npm-packages/
      */
@@ -26,7 +26,7 @@ const config = defineConfig({
     playwrightConfig: {
       timeout: 30000,
       use: {
-        baseURL: 'https://www.danube-web.shop',
+        baseURL: 'http://206.189.232.100:8080',
         viewport: { width: 1280, height: 720 },
       },
     },
