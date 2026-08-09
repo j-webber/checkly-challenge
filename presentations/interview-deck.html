@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkly SE Interview — Joe Webber</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d0d0d;
+    --surface:   #161616;
+    --border:    #252525;
+    --border-hi: #333;
+    --green:     #22d3a5;
+    --green-dim: #1a9e7d;
+    --green-bg:  rgba(34,211,165,.08);
+    --red:       #f87171;
+    --red-bg:    rgba(248,113,113,.08);
+    --amber:     #fbbf24;
+    --text:      #e8e8e8;
+    --muted:     #666;
+    --muted-hi:  #888;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Inter', system-ui, sans-serif;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── Deck shell ── */
+  #deck {
+    width: 100%; height: 100%;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s ease;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ── Nav ── */
+  #nav {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; align-items: center; z-index: 100;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border-hi);
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+  }
+  .dot.active { background: var(--green); transform: scale(1.4); }
+
+  #slide-num {
+    position: fixed; top: 28px; right: 36px;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--muted);
+    z-index: 100;
+  }
+
+  #arrow-hint {
+    position: fixed; bottom: 30px; right: 36px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted);
+    opacity: .5;
+  }
+
+  /* ── Typography ── */
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: var(--green); letter-spacing: .12em; text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4.5vw, 3.4rem);
+    font-weight: 600; line-height: 1.15;
+    letter-spacing: -.02em;
+  }
+  h2 {
+    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    font-weight: 600; line-height: 1.2;
+    letter-spacing: -.015em;
+  }
+  h3 {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    font-weight: 500; color: var(--muted-hi);
+    letter-spacing: -.01em;
+  }
+
+  .mono { font-family: var(--mono); }
+
+  /* ── Divider ── */
+  .rule {
+    width: 48px; height: 2px;
+    background: var(--green);
+    margin: 28px 0;
+    border-radius: 2px;
+  }
+
+  /* ── Slide 1 — Title ── */
+  #s1 { text-align: center; }
+  #s1 .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border-hi);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--muted-hi);
+    margin-bottom: 36px;
+  }
+  #s1 .badge .dot-live {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse-live 2s ease-in-out infinite;
+  }
+  @keyframes pulse-live {
+    0%,100% { opacity: 1; } 50% { opacity: .3; }
+  }
+  #s1 h1 { max-width: 820px; }
+  #s1 .sub {
+    margin-top: 28px;
+    font-family: var(--mono); font-size: 14px;
+    color: var(--muted); line-height: 1.7;
+  }
+  #s1 .sub span { color: var(--muted-hi); }
+
+  /* ── Slide 2 — The Gap ── */
+  #s2 .scenario-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 44px;
+    max-width: 860px;
+    width: 100%;
+    margin-top: 32px;
+  }
+  #s2 .timeline {
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .tl-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .tl-time {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--muted); padding-top: 2px;
+    text-align: right;
+  }
+  .tl-event {
+    font-size: 15px; line-height: 1.55; color: var(--text);
+  }
+  .tl-event .tag {
+    display: inline-block;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    padding: 2px 8px; border-radius: 4px; margin-right: 8px;
+    vertical-align: middle;
+  }
+  .tag-ok  { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-dim); }
+  .tag-bad { background: var(--red-bg);   color: var(--red);   border: 1px solid rgba(248,113,113,.3); }
+  .tag-cus { background: rgba(251,191,36,.08); color: var(--amber); border: 1px solid rgba(251,191,36,.3); }
+
+  .tl-divider {
+    height: 1px; background: var(--border);
+    margin: 4px 0;
+    grid-column: 1/-1;
+  }
+
+  /* ── Slide 3 — Scope ── */
+  #s3 .check-list {
+    display: flex; flex-direction: column; gap: 16px;
+    max-width: 760px; width: 100%;
+    margin-top: 32px;
+  }
+  .check-row {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+  }
+  .check-icon {
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .check-body strong {
+    display: block; font-size: 15px; font-weight: 500; margin-bottom: 4px;
+  }
+  .check-body .desc {
+    font-size: 13px; color: var(--muted-hi); font-family: var(--mono);
+  }
+  .check-freq {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--green); white-space: nowrap;
+  }
+  #s3 .rationale {
+    max-width: 760px; margin-top: 28px;
+    font-size: 14px; color: var(--muted-hi); line-height: 1.65;
+    border-left: 2px solid var(--border-hi);
+    padding-left: 16px;
+  }
+  #s3 .rationale strong { color: var(--text); }
+
+  /* ── Slide 4 — Live Demo transition ── */
+  #s4 {
+    text-align: center;
+    background: radial-gradient(ellipse at center, rgba(34,211,165,.04) 0%, transparent 70%);
+  }
+  #s4 .terminal-prompt {
+    font-family: var(--mono); font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    color: var(--muted);
+    margin-bottom: 40px;
+  }
+  #s4 .terminal-prompt .cursor {
+    display: inline-block; width: 2px; height: 1.1em;
+    background: var(--green); margin-left: 4px;
+    vertical-align: text-bottom;
+    animation: blink .9s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  #s4 h1 { font-size: clamp(3rem, 7vw, 5.5rem); letter-spacing: -.03em; }
+  #s4 h1 .accent { color: var(--green); }
+  #s4 .sub-note {
+    margin-top: 32px; font-size: 15px; color: var(--muted);
+    max-width: 480px;
+  }
+
+  /* ── Slide 5 — What just happened ── */
+  #s5 .compare {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 24px; max-width: 860px; width: 100%;
+    margin-top: 36px;
+  }
+  .compare-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 28px 28px 32px;
+  }
+  .compare-col .col-label {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    letter-spacing: .1em; text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .compare-col.passive .col-label { color: var(--red); }
+  .compare-col.active  .col-label { color: var(--green); }
+  .compare-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .compare-col ul li {
+    font-size: 14px; line-height: 1.55; color: var(--muted-hi);
+    padding-left: 18px; position: relative;
+  }
+  .compare-col ul li::before {
+    content: '';
+    position: absolute; left: 0; top: 8px;
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .passive ul li::before { background: var(--red); }
+  .active  ul li::before { background: var(--green); }
+  #s5 .thesis {
+    max-width: 860px; margin-top: 28px;
+    font-size: 18px; font-weight: 500; color: var(--text);
+    text-align: center; line-height: 1.5;
+  }
+  #s5 .thesis .hl { color: var(--green); }
+
+  /* ── Slide 6 — Persona hits ── */
+  #s6 .persona-grid {
+    display: flex; flex-direction: column; gap: 12px;
+    max-width: 900px; width: 100%;
+    margin-top: 32px;
+  }
+  .persona-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .persona-name {
+    padding: 16px 20px;
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: var(--muted-hi);
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center;
+    background: rgba(255,255,255,.015);
+  }
+  .persona-value {
+    padding: 16px 22px;
+    font-size: 14px; line-height: 1.5; color: var(--text);
+    display: flex; align-items: center;
+  }
+
+  /* ── Slide 7 — AI usage ── */
+  #s7 .ai-list {
+    display: flex; flex-direction: column; gap: 20px;
+    max-width: 820px; width: 100%;
+    margin-top: 36px;
+  }
+  .ai-item {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+  .ai-num {
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    color: var(--green);
+    width: 36px; height: 36px;
+    border: 1px solid var(--green-dim);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .ai-text strong {
+    display: block; font-size: 15px; font-weight: 500;
+    margin-bottom: 4px; color: var(--text);
+  }
+  .ai-text p {
+    font-size: 13px; color: var(--muted-hi); line-height: 1.6;
+  }
+  .ai-text code {
+    font-family: var(--mono); font-size: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 4px; color: var(--green);
+  }
+
+  /* ── Slide 8 — Close ── */
+  #s8 { text-align: center; }
+  #s8 h2 { max-width: 740px; }
+  #s8 .next-items {
+    display: flex; gap: 16px; margin-top: 40px;
+    flex-wrap: wrap; justify-content: center;
+    max-width: 820px;
+  }
+  .next-chip {
+    font-family: var(--mono); font-size: 13px;
+    color: var(--muted-hi);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 18px;
+    background: var(--surface);
+    transition: border-color .2s, color .2s;
+  }
+  .next-chip:hover { border-color: var(--green); color: var(--green); }
+  #s8 .closer {
+    margin-top: 52px;
+    font-family: var(--mono); font-size: 13px; color: var(--muted);
+  }
+  #s8 .closer strong { color: var(--green); }
+
+  /* ── Shared decorative grid ── */
+  .grid-bg {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: .25;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+  }
+  .slide > * { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<div id="deck">
+
+  <!-- ═══ SLIDE 1 ═══ -->
+  <section class="slide active" id="s1">
+    <div class="badge">
+      <span class="dot-live"></span>
+      SE Interview &nbsp;·&nbsp; 60 min &nbsp;·&nbsp; Joe Webber
+    </div>
+    <h1>Synthetic monitoring<br>for teams that already<br>have Grafana</h1>
+    <div class="rule" style="margin: 32px auto;"></div>
+    <p class="sub">
+      <span>Astronomy Shop &nbsp;·&nbsp; OpenTelemetry Demo</span>
+    </p>
+  </section>
+
+  <!-- ═══ SLIDE 2 ═══ -->
+  <section class="slide" id="s2">
+    <div class="eyebrow">The scenario</div>
+    <h2>Your customer found it first</h2>
+    <div class="scenario-card">
+      <div class="timeline">
+        <div class="tl-row">
+          <div class="tl-time">09:14</div>
+          <div class="tl-event"><span class="tag tag-ok">OK</span> Grafana: error rate nominal. P95 latency fine.</div>
+        </div>
+        <div class="tl-row"><div class="tl-divider"></div></div>
+        <div class="tl-row">
+          <div class="tl-time">09:14 – 09:47</div>
+          <div class="tl-event">Checkout silently fails for real users. No threshold crossed. No alert fires.</div>
+        </div>
+        <div class="tl-row"><div class="tl-divider"></div></div>
+        <div class="tl-row">
+          <div class="tl-time">09:47</div>
+          <div class="tl-event"><span class="tag tag-cus">SUPPORT</span> Customer files a ticket: "I can't complete my order."</div>
+        </div>
+        <div class="tl-row"><div class="tl-divider"></div></div>
+        <div class="tl-row">
+          <div class="tl-time">09:47</div>
+          <div class="tl-event"><span class="tag tag-bad">ALERT</span> That ticket is your first alert.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SLIDE 3 ═══ -->
+  <section class="slide" id="s3">
+    <div class="eyebrow">Scope as a judgment call</div>
+    <h2>3 checks. Not 30.</h2>
+    <div class="check-list">
+      <div class="check-row">
+        <div class="check-icon">⬡</div>
+        <div class="check-body">
+          <strong>Product Catalog — List Products</strong>
+          <span class="desc">GET /api/products &nbsp;·&nbsp; fast backend canary</span>
+        </div>
+        <div class="check-freq">every 1 min</div>
+      </div>
+      <div class="check-row">
+        <div class="check-icon">⬡</div>
+        <div class="check-body">
+          <strong>Cart — Add Item (backend direct)</strong>
+          <span class="desc">POST /api/cart &nbsp;·&nbsp; checkout logic, bypasses UI</span>
+        </div>
+        <div class="check-freq">every 5 min</div>
+      </div>
+      <div class="check-row">
+        <div class="check-icon">⬡</div>
+        <div class="check-body">
+          <strong>Revenue Path — End to End</strong>
+          <span class="desc">Playwright &nbsp;·&nbsp; browse → cart → checkout → confirm</span>
+        </div>
+        <div class="check-freq">every 10 min</div>
+      </div>
+    </div>
+    <p class="rationale">
+      <strong>Restraint is the skill.</strong> I skipped currency, recommendation, shipping, ad, email,
+      quote, and fraud services — none of them sit on the revenue path this prospect cares about.
+      Coverage of the critical path beats comprehensiveness of the service map.
+    </p>
+  </section>
+
+  <!-- ═══ SLIDE 4 ═══ -->
+  <section class="slide" id="s4">
+    <p class="terminal-prompt">$ npx checkly test<span class="cursor"></span></p>
+    <h1><span class="accent">Watch</span> this live.</h1>
+    <p class="sub-note">Dashboard walkthrough → flip a feature flag → watch a check go red.</p>
+  </section>
+
+  <!-- ═══ SLIDE 5 ═══ -->
+  <section class="slide" id="s5">
+    <div class="eyebrow">What just happened</div>
+    <h2>Synthetic catches what passive misses</h2>
+    <div class="compare">
+      <div class="compare-col passive">
+        <div class="col-label">Passive alerting</div>
+        <ul>
+          <li>Waits for traffic patterns to trigger thresholds</li>
+          <li>Works when failure volume is high enough</li>
+          <li>Silent on low-traffic paths during off-hours</li>
+          <li>Your customer is the canary</li>
+        </ul>
+      </div>
+      <div class="compare-col active">
+        <div class="col-label">Synthetic monitoring</div>
+        <ul>
+          <li>Actively checks for truth on a fixed schedule</li>
+          <li>Detects failure at zero user traffic</li>
+          <li>Isolates backend from frontend from network</li>
+          <li>You are the canary</li>
+        </ul>
+      </div>
+    </div>
+    <p class="thesis">
+      Grafana tells you <em>how</em> your system is behaving.<br>
+      Checkly tells you <span class="hl">whether it still works</span>.
+    </p>
+  </section>
+
+  <!-- ═══ SLIDE 6 ═══ -->
+  <section class="slide" id="s6">
+    <div class="eyebrow">What this means per role</div>
+    <div class="persona-grid">
+      <div class="persona-row">
+        <div class="persona-name">Sr VP Engineering</div>
+        <div class="persona-value">Revenue risk caught in minutes, not discovered by customers</div>
+      </div>
+      <div class="persona-row">
+        <div class="persona-name">Engineering Manager</div>
+        <div class="persona-value">Alerting hygiene — high-signal, low-noise, no threshold-tuning treadmill</div>
+      </div>
+      <div class="persona-row">
+        <div class="persona-name">Sr SRE</div>
+        <div class="persona-value">Fast MTTD + built-in isolation: backend vs. frontend vs. network</div>
+      </div>
+      <div class="persona-row">
+        <div class="persona-name">Sr Developer</div>
+        <div class="persona-value">The Playwright spec runs in CI unchanged — zero rewrite to become a monitor</div>
+      </div>
+      <div class="persona-row">
+        <div class="persona-name">Sr Quality Engineer</div>
+        <div class="persona-value">CI coverage that keeps running in production, not just at merge time</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SLIDE 7 ═══ -->
+  <section class="slide" id="s7">
+    <div class="eyebrow">How AI was used</div>
+    <h2>Fast scaffold. Verified reality. Owned the reasoning.</h2>
+    <div class="ai-list">
+      <div class="ai-item">
+        <div class="ai-num">01</div>
+        <div class="ai-text">
+          <strong>Scaffolded check structure quickly</strong>
+          <p>Used Claude to generate the initial <code>ApiCheck</code> and <code>BrowserCheck</code> constructs and wire the <code>checkly.config.ts</code>. Cut 30 min of boilerplate to under 5.</p>
+        </div>
+      </div>
+      <div class="ai-item">
+        <div class="ai-num">02</div>
+        <div class="ai-text">
+          <strong>Verified every route, selector, and payload against the live app</strong>
+          <p>Probed <code>GET /api/products</code>, tested <code>POST /api/cart</code> with real payloads, scraped the JS bundle for <code>data-cy</code> values and form field <code>id</code>s. No generated guesses trusted.</p>
+        </div>
+      </div>
+      <div class="ai-item">
+        <div class="ai-num">03</div>
+        <div class="ai-text">
+          <strong>Owned the check-selection reasoning personally</strong>
+          <p>AI doesn't know what's on the revenue path for this prospect. The decision to skip 7 services and write 3 specific checks — that's a judgment call, not a prompt.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SLIDE 8 ═══ -->
+  <section class="slide" id="s8">
+    <div class="eyebrow">If this were a real engagement</div>
+    <h2>What comes next at scale</h2>
+    <div class="next-items">
+      <div class="next-chip">PagerDuty / Slack alert channels</div>
+      <div class="next-chip">More checks as production surfaces gaps</div>
+      <div class="next-chip">Checkly in CI on every deploy</div>
+      <div class="next-chip">Group checks by service / team</div>
+      <div class="next-chip">OTel trace correlation on failures</div>
+      <div class="next-chip">Private locations for internal services</div>
+    </div>
+    <div class="closer">
+      Start on the revenue path. &nbsp;Expand where production tells you to.<br><br>
+      <strong>Questions?</strong>
+    </div>
+  </section>
+
+</div><!-- /deck -->
+
+<div id="nav"></div>
+<div id="slide-num"></div>
+<div id="arrow-hint">← → navigate</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const nav    = document.getElementById('nav');
+  const numEl  = document.getElementById('slide-num');
+  let cur = 0;
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.addEventListener('click', () => go(i));
+    nav.appendChild(d);
+  });
+
+  function go(n) {
+    slides[cur].classList.remove('active');
+    nav.children[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(n, slides.length - 1));
+    slides[cur].classList.add('active');
+    nav.children[cur].classList.add('active');
+    numEl.textContent = (cur + 1) + ' / ' + slides.length;
+  }
+
+  go(0);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown'  || e.key === ' ')  go(cur + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                       go(cur - 1);
+    if (e.key === 'Home')                                                     go(0);
+    if (e.key === 'End')                                                      go(slides.length - 1);
+  });
+
+  // Click right half to advance, left half to go back
+  document.getElementById('deck').addEventListener('click', e => {
+    if (e.target.closest('#nav')) return;
+    e.clientX > window.innerWidth / 2 ? go(cur + 1) : go(cur - 1);
+  });
+</script>
+</body>
+</html>
